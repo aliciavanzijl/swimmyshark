@@ -32,6 +32,19 @@ const uint8_t sharkA [23][2] = {
 	{4, -1}
 };
 
+int test [4][2] = {
+	{1, 1}, {2, 1}, {2, 2,}, {1, 2}
+};
+
+int testB [23][2] = {
+	{3, -6},
+	{3, -5}, {4, -5},
+	{0, -4}, {2, -4}, {3, -4}, {4, -4}, {5, -4}, {6, -4}, {7, -4},
+	{1, -3}, {2, -3}, {3, -3}, {4, -3}, {5, -3}, {7, -3},
+	{0, -2}, {2, -2}, {3, -2}, {4, -2}, {5, -2}, {6, -2},
+	{4, -1}
+};
+
 const uint8_t hook[] = {
 0x00, 0x00, 0x60, 0x80, 0x8f, 0x70, 0x00, 0x00
 };
@@ -121,7 +134,7 @@ int main() {
 	
 	start();
 	
-	spritex = 20;
+	spritex = 10;
 	spritey = 16;
 	currentLevel = 1;
 	levelPos = 0;
@@ -179,14 +192,14 @@ void updateLogic() {
 		}
 	}
 	if(inputs & BTN_3) {
-		if(spritey < 31) {
-			//delayms(128);
+		if(spritey < 23) {
+			delayms(16);
 			spritey++;
 		}
 	}
 	if(inputs & BTN_2) {
-		if(spritey > 0) {
-			//delayms(128);
+		if(spritey > 8) {
+			delayms(16);
 			spritey--;
 		}
 	}
@@ -205,19 +218,17 @@ void updateLogic() {
 	// COLLISION DETECTION
 	int obj;
 	for(obj = 0; obj < 5; obj++) {
-		if (spritey == levelObstacles[obj][1]) {
-			if (spritefront == (levelObstacles[obj][0] - levelPos) | spritefront == ((levelObstacles[obj][0] - levelPos)+8*spritedirection)) {
-				// COLLISION DETECTED
-				delayms(128);
-				lives = lives - powerOf(lifeCounter, 2);
-				spritex = spritex - 4*spritedirection;
-				// Update LEDs to show lives
-				// Port E 7-0 are the LEDs PORTE has address 0xbf886110
-				volatile int* porte = (volatile int*) 0xbf886110;
-				*porte = 0x001f & lives;
-				// decrease lifeCounter
-				lifeCounter--;
-			}
+		if ( ((spritey / 8) == levelObstacles[obj][1]) & (spritefront == (levelObstacles[obj][0] - levelPos) | spritefront == ((levelObstacles[obj][0] - levelPos)+8*spritedirection)) ) {
+			// COLLISION DETECTED
+			delayms(128);
+			lives = lives - powerOf(lifeCounter, 2);
+			spritex = spritex - 4*spritedirection;
+			// Update LEDs to show lives
+			// Port E 7-0 are the LEDs PORTE has address 0xbf886110
+			volatile int* porte = (volatile int*) 0xbf886110;
+			*porte = 0x001f & lives;
+			// decrease lifeCounter
+			lifeCounter--;
 		}
 	}
 	
@@ -226,8 +237,8 @@ void updateLogic() {
 	// DETECT HITING END OF LEVEL FLAG
 	if(levelPos == 128 & spritefront >= 118) {
 		delayms(128);
-		spritex = 20;
-		spritey = 2;
+		spritex = 10;
+		spritey = 16;
 		currentLevel++;
 		levelPos = 0;
 	}
@@ -242,7 +253,8 @@ void loadGraphics() {
 	clearBuffer(512, displayBuffer); 	//Clears the display buffer
 
 	// insert functions here to put player and scene graphics in buffer
-	loadSprite(spritex, spritey, spritedirection, sharkA, displayBuffer);
+	//loadSprite(spritex, spritey, spritedirection, sharkA, displayBuffer);
+	testSprite(spritex, spritey, spritedirection, testB, displayBuffer);
 	loadTiles(0, 2, 16, 128, lowerLine, displayBuffer); //load wave tiles
 	loadLevel(levelPos, levelBuffer, displayBuffer);
 	// add function for loading UI at bottom to show level & lives
