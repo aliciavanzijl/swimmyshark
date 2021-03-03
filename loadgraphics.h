@@ -6,7 +6,7 @@
 
 //void loadSprite (int x, int y, int direction, const uint8_t *data, uint8_t * displayBuffer);
 
-void loadSprite (int x, int y, int direction, const uint8_t * data[], uint8_t * displayBuffer);
+void loadSprite (int x, int y, int direction, const uint8_t * data[23][2], uint8_t * displayBuffer);
 
 void loadTiles (int x, int y, int tiles, int bufferSize, const uint8_t *data, uint8_t * buffer);
 

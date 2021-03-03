@@ -179,14 +179,14 @@ void updateLogic() {
 		}
 	}
 	if(inputs & BTN_3) {
-		if(spritey < 2) {
-			delayms(128);
+		if(spritey < 31) {
+			//delayms(128);
 			spritey++;
 		}
 	}
 	if(inputs & BTN_2) {
 		if(spritey > 0) {
-			delayms(128);
+			//delayms(128);
 			spritey--;
 		}
 	}

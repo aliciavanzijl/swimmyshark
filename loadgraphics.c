@@ -18,7 +18,7 @@ void setBit(uint8_t* byte, uint8_t b);
 
 /* Functions */
 
-void loadSprite (int x, int y, int direction, const uint8_t * data[], uint8_t * displayBuffer) {
+void loadSprite (int x, int y, int direction, const uint8_t * data[23][2], uint8_t * displayBuffer) {
 	
 	/*
 	int size = 8;
@@ -32,14 +32,14 @@ void loadSprite (int x, int y, int direction, const uint8_t * data[], uint8_t * 
 	//int size = sizeof(data) / sizeof(data[0]);
 	int size = 23;
 	
-	int valueX;
-	int valueY;
+	uint8_t valueX;
+	uint8_t valueY;
 	int B, b;
 	int i;
 	
 	for(i = 0; i < size; i++) {
 		
-		valueX = (data[i][0] + x) * direction;
+		valueX = (data[i][0] + x) /** direction*/;
 		valueY = data[i][1] + y;
 		
 		B = (valueY / 8) * 128 + valueX;
