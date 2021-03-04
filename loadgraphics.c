@@ -2,17 +2,6 @@
 #include <pic32mx.h>
 #include "display.h"
 
-//uint8_t levelBuffer[1024];	// Level buffer
-/*
-const uint8_t sharkA [23][2] = {
-	{3, -6},
-	{3, -5}, {4, -5},
-	{0, -4}, {2, -4}, {3, -4}, {4, -4}, {5, -4}, {6, -4}, {7, -4},
-	{1, -3}, {2, -3}, {3, -3}, {4, -3}, {5, -3}, {7, -3},
-	{0, -2}, {2, -2}, {3, -2}, {4, -2}, {5, -2}, {6, -2},
-	{4, -1}
-};*/
-
 /* PROTOTYPING */
 void setBit(uint8_t* byte, uint8_t b);
 
@@ -65,7 +54,7 @@ void loadObject (int x, int y, int size, int direction, const uint8_t *data, uin
 	
 }
 
-void testObject (int x, int y, int direction, int data[23][2], uint8_t * levelBuffer) {
+void loadRock (int x, int y, int direction, int data[23][2], uint8_t * levelBuffer) {
 	
 	int size = 23;
 	
@@ -87,6 +76,100 @@ void testObject (int x, int y, int direction, int data[23][2], uint8_t * levelBu
 }
 
 
+void loadHook (int x, int y, int direction, int data[11][2], uint8_t * levelBuffer) {
+	
+	int size = 11;
+	
+	int valueX;
+	int valueY;
+	int B, b;
+	int i;
+	
+	for(i = 0; i < size; i++) {
+		
+		valueX = (data[i][0] * direction) + x;
+		valueY = data[i][1] + y;
+		
+		B = (valueY / 8) * 256 + valueX;
+		b = valueY % 8;
+		
+		setBit(&levelBuffer[B], b);
+	}
+}
+
+void loadNet (int x, int y, int direction, int data[127][2], uint8_t * levelBuffer) {
+	
+	int size = 127;
+	
+	int valueX;
+	int valueY;
+	int B, b;
+	int i;
+	
+	for(i = 0; i < size; i++) {
+		
+		valueX = (data[i][0] * direction) + x;
+		valueY = data[i][1] + y;
+		
+		B = (valueY / 8) * 256 + valueX;
+		b = valueY % 8;
+		
+		setBit(&levelBuffer[B], b);
+	}
+}
+
+/*
+void loadFish (int x, int y, int direction, int levelFish[3][3], int data[14][2], uint8_t * levelBuffer) {
+	
+	int size = 14;
+	
+	int valueX;
+	int valueY;
+	int B, b;
+	int i;
+	
+	for(i = 0; i < size; i++) {
+
+		valueX = (data[i][0] * direction) + x;
+		valueY = data[i][1] + y;
+
+		B = (valueY / 8) * 256 + valueX;
+		b = valueY % 8;
+
+		setBit(&levelBuffer[B], b);
+	}
+} */
+
+void loadFish (int levelFish[3][3], int data[14][2], uint8_t * levelBuffer) {
+	
+	int size = 14;
+	
+	int valueX;
+	int valueY;
+	int B, b;
+	int i;
+	
+	int fishNumber;
+	
+	for(fishNumber = 0; fishNumber < 3; fishNumber++) {
+		
+		if (levelFish[fishNumber][2] == 1) {
+			
+			for(i = 0; i < size; i++) {
+		
+				valueX = (data[i][0]) + levelFish[fishNumber][0];
+				valueY = data[i][1] + levelFish[fishNumber][1];
+		
+				B = (valueY / 8) * 256 + valueX;
+				b = valueY % 8;
+		
+				setBit(&levelBuffer[B], b);
+			}
+		}
+	}
+}
+
+
 void loadLevel (int levelPos, uint8_t *levelBuffer, uint8_t *displayBuffer) {
 	
 	int yPos;
@@ -99,7 +182,6 @@ void loadLevel (int levelPos, uint8_t *levelBuffer, uint8_t *displayBuffer) {
 	}
 	
 }
-
 
 //Sets a bit to the display buffer
 void setBit(uint8_t* byte, uint8_t b)
