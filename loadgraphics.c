@@ -17,39 +17,8 @@ const uint8_t sharkA [23][2] = {
 void setBit(uint8_t* byte, uint8_t b);
 
 /* Functions */
-/*
-void loadSprite (int x, int y, int direction, const uint8_t * data[23][2], uint8_t * displayBuffer) {
-	
-	
-	//int size = 8;
-	//int i;
-	//int pos = 128*y + x;
-	
-	//for(i = 0; i < size; i++) {
-		//displayBuffer[pos+(i*direction)] |= data[i];
-	//}
-	
-	//int size = sizeof(data) / sizeof(data[0]);
-	int size = 23;
-	
-	uint8_t valueX;
-	uint8_t valueY;
-	int B, b;
-	int i;
-	
-	for(i = 0; i < size; i++) {
-		
-		valueX = (data[i][0] + x) * direction;
-		valueY = data[i][1] + y;
-		
-		B = (valueY / 8) * 128 + valueX;
-		b = valueY % 8;
-		
-		setBit(&displayBuffer[B], b);
-	}
-} */ 
 
-void testSprite (int x, int y, int direction, int data[23][2], uint8_t * displayBuffer) {
+void loadSprite (int x, int y, int direction, int data[23][2], uint8_t * displayBuffer) {
 	
 	int size = 23;
 	
@@ -96,6 +65,26 @@ void loadObject (int x, int y, int size, int direction, const uint8_t *data, uin
 	
 }
 
+void testObject (int x, int y, int direction, int data[23][2], uint8_t * levelBuffer) {
+	
+	int size = 23;
+	
+	int valueX;
+	int valueY;
+	int B, b;
+	int i;
+	
+	for(i = 0; i < size; i++) {
+		
+		valueX = (data[i][0] * direction) + x;
+		valueY = data[i][1] + y;
+		
+		B = (valueY / 8) * 256 + valueX;
+		b = valueY % 8;
+		
+		setBit(&levelBuffer[B], b);
+	}
+}
 
 
 void loadLevel (int levelPos, uint8_t *levelBuffer, uint8_t *displayBuffer) {

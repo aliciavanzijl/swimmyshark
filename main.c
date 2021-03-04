@@ -19,24 +19,8 @@ uint8_t levelBuffer[DISPLAY_SIZE*2];	// Level buffer
 uint8_t inputs;							//Inputs as 8 LSB
 
 /* SPRITES */
-const uint8_t shark[] = {
-0x28, 0x10, 0x38, 0x3e, 0x7c, 0x38, 0x28, 0x18
-};
 
-const uint8_t sharkA [23][2] = {
-	{3, -6},
-	{3, -5}, {4, -5},
-	{0, -4}, {2, -4}, {3, -4}, {4, -4}, {5, -4}, {6, -4}, {7, -4},
-	{1, -3}, {2, -3}, {3, -3}, {4, -3}, {5, -3}, {7, -3},
-	{0, -2}, {2, -2}, {3, -2}, {4, -2}, {5, -2}, {6, -2},
-	{4, -1}
-};
-
-int test [4][2] = {
-	{1, 1}, {2, 1}, {2, 2,}, {1, 2}
-};
-
-int testB [23][2] = {
+int shark [23][2] = {
 	{3, -6},
 	{3, -5}, {4, -5},
 	{0, -4}, {2, -4}, {3, -4}, {4, -4}, {5, -4}, {6, -4}, {7, -4},
@@ -55,6 +39,15 @@ const uint8_t fish[] = {
 
 const uint8_t rock[] = {
 0x80, 0xc0, 0xe0, 0xf8, 0xfe, 0xf0, 0xe0, 0x80
+};
+
+int rockTest [23][2] = {
+	{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0},
+	{1, -1}, {2, -1}, {3, -1}, {4, -1}, {5, -1}, {6, -1},
+	{2, -2}, {3, -2}, {4, -2}, {5, -2},
+	{3, -3}, {4, -3},
+	{3, -4}, {4, -4},
+	{4, -5}
 };
 
 const uint8_t net[] = {
@@ -203,6 +196,7 @@ void updateLogic() {
 			spritey--;
 		}
 	}
+	
 	// Update sprite front for collision detection
 	spritefront = spritex + (7 * spritedirection);
 	
@@ -218,7 +212,7 @@ void updateLogic() {
 	// COLLISION DETECTION
 	int obj;
 	for(obj = 0; obj < 5; obj++) {
-		if ( ((spritey / 8) == levelObstacles[obj][1]) & (spritefront == (levelObstacles[obj][0] - levelPos) | spritefront == ((levelObstacles[obj][0] - levelPos)+8*spritedirection)) ) {
+		if ( ((spritey + 4) >= levelObstacles[obj][1] & (spritey + 4) <= (levelObstacles[obj][1] + 7) ) & (spritefront == (levelObstacles[obj][0] - levelPos) | spritefront == ((levelObstacles[obj][0] - levelPos)+8*spritedirection)) ) {
 			// COLLISION DETECTED
 			delayms(128);
 			lives = lives - powerOf(lifeCounter, 2);
@@ -254,7 +248,7 @@ void loadGraphics() {
 
 	// insert functions here to put player and scene graphics in buffer
 	//loadSprite(spritex, spritey, spritedirection, sharkA, displayBuffer);
-	testSprite(spritex, spritey, spritedirection, testB, displayBuffer);
+	loadSprite(spritex, spritey, spritedirection, shark, displayBuffer);
 	loadTiles(0, 2, 16, 128, lowerLine, displayBuffer); //load wave tiles
 	loadLevel(levelPos, levelBuffer, displayBuffer);
 	// add function for loading UI at bottom to show level & lives
@@ -289,16 +283,21 @@ void loadLevel1 () {
 	loadTiles(0, 0, 32, 256, wave, levelBuffer); //load wave tiles
 	
 	// x,y,size,direction,name,buffer
-	loadObject(70, 2, 8, -1, rock, levelBuffer);
+	//loadObject(70, 2, 8, -1, rock, levelBuffer);
 	loadObject(100, 0, 8, 1, hook, levelBuffer); 
-	loadObject(180, 2, 8, 1, rock, levelBuffer);
+	//loadObject(180, 2, 8, 1, rock, levelBuffer);
+	
+	testObject (70, 23, 1, rockTest, levelBuffer);
+	testObject (180, 23, 1, rockTest, levelBuffer);
 	
 	levelObstacles[0][0] = 70;
-	levelObstacles[0][1] = 2;
+	levelObstacles[0][1] = 23;
+	//levelObstacles[0][1] = 2;
 	levelObstacles[1][0] = 100;
 	levelObstacles[1][1] = 0;
 	levelObstacles[2][0] = 180;
-	levelObstacles[2][1] = 2;
+	levelObstacles[2][1] = 23;
+	//levelObstacles[2][1] = 2;
 	levelObstacles[3][0] = 0;
 	levelObstacles[3][1] = 0;
 	levelObstacles[4][0] = 0;
