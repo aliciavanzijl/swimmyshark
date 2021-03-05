@@ -11,6 +11,7 @@
 #define numColumns 128		//number of display columns
 #define numPages 4 			//number of display memory pages
 
+
 /* ------------------------------------------------------------ */
 /*** SPI2SendByte
 ** Write/Read a byte on SPI port 2

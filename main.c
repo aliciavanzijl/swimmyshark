@@ -86,6 +86,17 @@ const uint8_t lowerLine[] = {
 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80
 };
 
+const uint8_t scoreLabel[] = {
+0x4c, 0x92, 0x92, 0x64, 0x00, 0x70, 0x88, 0x88, 0x00, 0x70, 0x88, 0x88, 
+0x70, 0x00, 0xf8, 0x08, 0x08, 0x10, 0x00, 0x70, 0xa8, 0xa8, 0xa8, 0x30
+};
+
+const uint8_t livesLabel[] = {
+0xfe, 0x80, 0x80, 0x80, 0x80, 0x00, 0xe8, 0x00, 0x38, 0x40, 0x80, 0x40, 
+0x38, 0x00, 0x70, 0xa8, 0xa8, 0xa8, 0x30, 0x00, 0x90, 0xa8, 0xa8, 0x48, 
+0x00, 0x10, 0x30, 0x7f, 0xff, 0x7f, 0x30, 0x10
+};
+
 // GLOBAL VARIABLES FOR GAME LOGIC
 int spritex;
 int spritey;
@@ -99,6 +110,7 @@ int lifeCounter = 4;				// counter to change led display for lives
 int livesDisplay = 0x1F;			// lives display value
 int lives = 5;						// lives counter for logic
 int score = 0;						// score counter
+int playTimeCounter = 0;			// time counter
 
 //Interval between updates of the game logic. 160 -> 60Hz, 190 -> 52Hz
 #define UPDATE_INTERVAL 190 		//clock measures s *10^-4, not -3 so 160 -> 16ms
@@ -139,9 +151,9 @@ void user_isr()
 	
 	if (getClk() == 500) {
 		moveFish();
+		playTimeCounter++;
 		clearClk();
 	}
-	
 	
 }
 
@@ -300,7 +312,7 @@ void isCatch() {
 			// CATCH DETECTED
 			delayms(64);
 			levelFish[fishNumber][2] = 0;	// set fish to inactive
-			score++;						// increase score total
+			score += 2;						// increase score total
 		}
 	}
 }
@@ -316,9 +328,7 @@ void loadGraphics() {
 	loadTiles(0, 2, 16, 128, lowerLine, displayBuffer); //load wave tiles
 	loadFish (levelFish, fish, levelBuffer);
 	loadLevel(levelPos, levelBuffer, displayBuffer);
-	
-	// add function for loading UI at bottom to show level & lives
-
+	loadUI(4, 3, score, lives, scoreLabel, livesLabel, displayBuffer);
 	displayUpdate(displayBuffer); //displays new buffer
 }
 
