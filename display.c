@@ -38,7 +38,7 @@ uint8_t SPI2SendByte(uint8_t byteVal)
 /* ------------------------------------------------------------ */
 /*** HostInit
 ** Perform PIC32 device initialization to prepare for use of the OLED
-** display. This example is hard coded for the chipKIT Uno32 and SPI2.
+** display. Taken from chipKit manual pages 9-13.
 */
 void hostInit()
 {
@@ -67,13 +67,14 @@ void hostInit()
 /* ------------------------------------------------------------ */
 /*** DspInit
 ** Initialize the OLED display controller and turn the display on.
+** Taken from the Taken from chipKit manual pages 9-13.
 */
 void dspInit()
 {
-	/* We're going to be sending commands, so clear the Data/Cmd bit*/
+	/* clear the Data/Cmd bit*/
 	PORTFCLR = bitDataCmd;
 	
-	/* Start by turning VDD on and wait a while for the power to come up.*/
+	/* Turn on VDD and wait a while for the power to come up.*/
 	PORTFCLR = bitVddCtrl;
 	delayms(1);
 	
@@ -115,6 +116,7 @@ void dspInit()
 ** Parameters:
 ** numBytes - number of bytes to send/receive
 ** byteBuffer - pointer to the buffer to send
+** Taken from chipKit manual pages 9-13.
 */
 
 void displaySendPage(int numBytes, uint8_t * byteBuffer)
@@ -151,6 +153,7 @@ void displayUpdate(uint8_t * byteBuffer)
 	int i;
 	
 	for (i = 0; i < numPages; i++) {
+		/* clear the Data/Cmd bit*/
 		PORTFCLR = bitDataCmd;
 
 		/* Set the page address */
@@ -158,8 +161,8 @@ void displayUpdate(uint8_t * byteBuffer)
 		SPI2SendByte(i); //page number
 		
 		/* Start at the left column */
-		SPI2SendByte(0x00); //set low nybble of column
-		SPI2SendByte(0x10); //set high nybble of column
+		SPI2SendByte(0x00); //set low nibble of column
+		SPI2SendByte(0x10); //set high nibble of column
 		PORTFSET = bitDataCmd;
 		
 		/* Copy this memory page of display data. */

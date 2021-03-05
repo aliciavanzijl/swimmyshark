@@ -19,6 +19,8 @@ void loadFish (int levelFish[3][4], int data[14][2], uint8_t * levelBuffer);
 
 void loadLevel (int levelPos, uint8_t *levelBuffer, uint8_t *displayBuffer);
 
+void loadScreen (int x, int y, int size, const uint8_t *data, uint8_t *buffer);
+
 void setBit(uint8_t* byte, uint8_t b);
 
 #endif

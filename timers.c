@@ -45,6 +45,7 @@ void delayms(int x){
 	return;
 }
 
+/*
 void delayds(int x){
 	int counter = 0;
 	TMR2 = 0x0;
@@ -59,6 +60,7 @@ void delayds(int x){
 	}
 	return;
 }
+*/
 
 void clearClk()
 {

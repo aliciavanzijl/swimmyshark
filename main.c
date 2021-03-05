@@ -97,6 +97,41 @@ const uint8_t livesLabel[] = {
 0x00, 0x10, 0x30, 0x7f, 0xff, 0x7f, 0x30, 0x10
 };
 
+const uint8_t nextLevelDis[] = {
+0x3e, 0x08, 0x10, 0x3e, 0x00, 			// N
+0x1c, 0x2a, 0x2a, 0x22, 0x00, 			// E
+0x36, 0x08, 0x36, 0x00, 				// X
+0x02, 0x3e, 0x02, 						// T
+0x00, 0x00,								// space
+0x3e, 0x20, 0x20, 0x20, 0x00, 			// L
+0x1c, 0x2a, 0x2a, 0x22, 0x00, 			// E
+0x0e, 0x10, 0x20, 0x10, 0x0e, 0x00,		// V
+0x1c, 0x2a, 0x2a, 0x22, 0x00, 			// E
+0x3e, 0x20, 0x20, 0x20					// L
+}; // size 44
+
+const uint8_t gameOverDis[] = {
+0x1c, 0x22, 0x2a, 0x1a, 0x00, 			// G
+0x3c, 0x0a, 0x0a, 0x3c, 0x00, 			// A
+0x3e, 0x02, 0x0c, 0x02, 0x3e, 0x00, 	// M
+0x1c, 0x2a, 0x2a, 0x22,					// E
+0x00, 0x00, 							// space
+0x1c, 0x22, 0x22, 0x1c, 0x00,			// O
+0x0e, 0x10, 0x20, 0x10, 0x0e, 0x00,		// V
+0x1c, 0x2a, 0x2a, 0x22, 0x00, 			// E
+0x3c, 0x0a, 0x0a, 0x34 				// R
+}; // size 42
+
+const uint8_t gameWonDis[] = {
+0x0e, 0x38, 0x0e, 0x00, 				// Y
+0x1c, 0x22, 0x22, 0x1c, 0x00,			// O
+0x1e, 0x20, 0x20, 0x1e, 0x00, 			// U
+0x00, 0x00, 							// space
+0x1e, 0x20, 0x38, 0x20, 0x1e, 0x00,		// W
+0x22, 0x3e, 0x22, 0x00,					// I
+0x3e, 0x08, 0x10, 0x3e 				// N
+}; // size 30
+
 // GLOBAL VARIABLES FOR GAME LOGIC
 int spritex;
 int spritey;
@@ -112,9 +147,10 @@ int lives = 5;						// lives counter for logic
 int score = 0;						// score counter
 int playTimeCounter = 0;			// time counter
 int finalscore = 0;					// final score holder
+int gameOver = 0;					// game over flag
+int gameWon = 0;					// game finished flag
+int nextLevelUnlocked = 0;			// next level flag
 
-//Interval between updates of the game logic. 160 -> 60Hz, 190 -> 52Hz
-#define UPDATE_INTERVAL 190 		//clock measures s *10^-4, not -3 so 160 -> 16ms
 
 //Input masks
 #define SW_1  0x80
@@ -131,13 +167,14 @@ void inputHandler();              		// Polls inputs
 void isCollision ();					// Checks for collisions
 void isCatch ();						// Checks for fish collisions aka catch
 void loadGraphics();					// Puts graphics into buffer
+void displayMenuPage();					// Puts screens/menu into buffer
 void loadString();						// Puts string characters into text buffer
 void updateLogic();						// Updates game data based on inputs
-void loadLevel1();
+void loadLevel1();						// Loads level objects
 void loadLevel2();
 void loadLevel3();
-void setFish();
-void moveFish();
+void setFish();							// sets fish stats per level
+void moveFish();						// fish movement function
 int powerOf (int exp, int base);		// simple function for calculating power
 
 
@@ -150,6 +187,7 @@ void user_isr()
 		tickClk();
   	}
 	
+	// Fish movement on clock ticks
 	if (getClk() == 500) {
 		moveFish();
 		playTimeCounter++;
@@ -168,19 +206,21 @@ void start()
 
 int main() {
 	
-	start();
+	start();			// calls start function to init display, timers, & IO
 	
+	/* initialise some values for start of the game */
 	spritex = 10;
 	spritey = 16;
 	currentLevel = 1;
+	gameOver = 0;		// set flags to 0
+	gameWon = 0;
 	levelPos = 0;
-	// Update LEDs to show lives
-	// Port E 7-0 are the LEDs PORTE has address 0xbf886110
+	/* Update LEDs to show lives
+	** Port E 7-0 are the LEDs PORTE has address 0xbf886110 */
 	volatile int* porte = (volatile int*) 0xbf886110;
 	*porte = 0x001f & livesDisplay;
 	
-	// Set fish
-	setFish();
+	setFish();		// set fish for the level
 	
 	while(1) {
 		
@@ -250,7 +290,7 @@ void updateLogic() {
 	spritefront = spritex + (6 * spritedirection);
 	
 	// Display Scroll
-	if(spritefront >= 110 & (inputs & BTN_1)) {
+	if(spritefront >= 100 & (inputs & BTN_1)) {
 		delayms(16);
 		if(levelPos < 128) {
 			levelPos++;
@@ -267,20 +307,32 @@ void updateLogic() {
 	// DETECT GAME OVER
 	if(lives == 0) {
 		// end game logic
+		gameOver = 1;			// set gameover flag to 1
+		displayMenuPage();		// display Next Level screen
+		delayms(700);			// delay so it stays up for a short while
 	}
 	
 	// DETECT HITING END OF LEVEL FLAG
 	if(levelPos == 128 & spritefront >= 118) {
-		delayms(128);
-		spritex = 10;
-		spritey = 16;
-		currentLevel++;
-		levelPos = 0;
-		setFish();
+		
+		nextLevelUnlocked = 1;	// set next level flag
+		displayMenuPage();		// display Next Level screen
+		delayms(700);			// delay so it stays up for a short while
+		
+		nextLevelUnlocked = 0;	// reset next level flag
+		spritex = 10;			// reinitialise shark position
+		spritey = 16;			// reinitialise shark position
+		currentLevel++;			// change to next level
+		levelPos = 0;			// reset screen scroll position
+		setFish();				// set fish for new level
 	}
 	
 	// DETECT GAME COMPLETED
-	
+	if(currentLevel > 3) {
+		gameWon = 1;			// set gameWon to 1
+		displayMenuPage();		// display Next Level screen
+		delayms(700);			// delay so it stays up for a short while
+	}
 }
 
 // COLLISION DETECTION FUNCTION
@@ -333,6 +385,26 @@ void loadGraphics() {
 	displayUpdate(displayBuffer); //displays new buffer
 }
 
+// Updates the display with graphics from displayBuffer - screens/pages only
+void displayMenuPage() {
+	
+	clearBuffer(512, displayBuffer); 	//Clears the display buffer
+
+	// Function to put correct screen into display buffer
+	// x, y, size, graphics data, displayBuffer
+	if(gameWon == 1) {
+		loadScreen (49, 1, 30, gameWonDis, displayBuffer);
+	}
+	else if(gameOver == 1) {
+		loadScreen (43, 1, 42, gameOverDis, displayBuffer);
+	}
+	else if(nextLevelUnlocked = 1) {
+		loadScreen (42, 1, 44, nextLevelDis, displayBuffer);
+	}
+	
+	displayUpdate(displayBuffer); //displays new buffer
+}
+
 // Function from Labs
 void loadString(int line, char *s) {
 	
@@ -352,6 +424,7 @@ void loadString(int line, char *s) {
 	}
 }
 
+/* LEVELS & FISH CODE */
 
 // Level Details & Loading
 void loadLevel1 () {

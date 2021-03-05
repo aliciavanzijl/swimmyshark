@@ -389,6 +389,17 @@ void loadLevel (int levelPos, uint8_t *levelBuffer, uint8_t *displayBuffer) {
 	
 }
 
+void loadScreen (int x, int y, int size, const uint8_t *data, uint8_t *buffer) {
+	
+	int i;
+	int pos = 128*y + x;
+	
+	for(i = 0; i < size; i++) {
+		buffer[pos+i] |= data[i];	
+	}
+	
+}
+
 //Sets a bit to the display buffer
 void setBit(uint8_t* byte, uint8_t b)
 {
