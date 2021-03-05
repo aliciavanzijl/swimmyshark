@@ -97,12 +97,40 @@ const uint8_t livesLabel[] = {
 0x00, 0x10, 0x30, 0x7f, 0xff, 0x7f, 0x30, 0x10
 };
 
+const uint8_t titlePage[] = {
+0x24, 0x2a, 0x2a, 0x12, 0x00, 			// S
+0x1e, 0x20, 0x38, 0x20, 0x1e, 0x00,		// W
+0x22, 0x3e, 0x22, 0x00,					// I
+0x3e, 0x02, 0x0c, 0x02, 0x3e, 0x00, 	// M
+0x3e, 0x02, 0x0c, 0x02, 0x3e, 0x00, 	// M
+0x0e, 0x38, 0x0e, 0x00, 				// Y
+0x00, 									// space
+0x24, 0x2a, 0x2a, 0x12, 0x00, 			// S
+0x3e, 0x08, 0x08, 0x3e, 0x00, 			// H
+0x3c, 0x0a, 0x0a, 0x3c, 0x00, 			// A
+0x3c, 0x0a, 0x0a, 0x34, 0x00,			// R
+0x3e, 0x08, 0x14, 0x22, 0x00,			// K
+}; // size 58
+
+const uint8_t pressTo[] = {
+0x3c, 0x0a, 0x0a, 0x04, 0x00, 			// P
+0x3c, 0x0a, 0x0a, 0x34, 0x00,			// R
+0x1c, 0x2a, 0x2a, 0x22, 0x00, 			// E
+0x24, 0x2a, 0x2a, 0x12, 0x00, 			// S
+0x24, 0x2a, 0x2a, 0x12, 0x00, 			// S
+0x00, 									// space
+0x3e, 0x2a, 0x2a, 0x14, 0x00,			// B
+0x02, 0x3e, 0x02, 0x00,					// T
+0x3e, 0x08, 0x10, 0x3e, 0x00, 			// N
+0x24, 0x3e, 0x20, 0x00,					// 1
+}; // size 44
+
 const uint8_t nextLevelDis[] = {
 0x3e, 0x08, 0x10, 0x3e, 0x00, 			// N
 0x1c, 0x2a, 0x2a, 0x22, 0x00, 			// E
 0x36, 0x08, 0x36, 0x00, 				// X
-0x02, 0x3e, 0x02, 						// T
-0x00, 0x00,								// space
+0x02, 0x3e, 0x02, 0x00,					// T
+0x00, 									// space
 0x3e, 0x20, 0x20, 0x20, 0x00, 			// L
 0x1c, 0x2a, 0x2a, 0x22, 0x00, 			// E
 0x0e, 0x10, 0x20, 0x10, 0x0e, 0x00,		// V
@@ -119,7 +147,7 @@ const uint8_t gameOverDis[] = {
 0x1c, 0x22, 0x22, 0x1c, 0x00,			// O
 0x0e, 0x10, 0x20, 0x10, 0x0e, 0x00,		// V
 0x1c, 0x2a, 0x2a, 0x22, 0x00, 			// E
-0x3c, 0x0a, 0x0a, 0x34 				// R
+0x3c, 0x0a, 0x0a, 0x34 					// R
 }; // size 42
 
 const uint8_t gameWonDis[] = {
@@ -129,7 +157,7 @@ const uint8_t gameWonDis[] = {
 0x00, 0x00, 							// space
 0x1e, 0x20, 0x38, 0x20, 0x1e, 0x00,		// W
 0x22, 0x3e, 0x22, 0x00,					// I
-0x3e, 0x08, 0x10, 0x3e 				// N
+0x3e, 0x08, 0x10, 0x3e 					// N
 }; // size 30
 
 // GLOBAL VARIABLES FOR GAME LOGIC
@@ -150,6 +178,8 @@ int finalscore = 0;					// final score holder
 int gameOver = 0;					// game over flag
 int gameWon = 0;					// game finished flag
 int nextLevelUnlocked = 0;			// next level flag
+int menuPageActive = 0;				// menu page flag
+int gameFinished = 0;				// game finished flag
 
 
 //Input masks
@@ -164,6 +194,8 @@ int nextLevelUnlocked = 0;			// next level flag
 
 // Function Prototypes
 void inputHandler();              		// Polls inputs
+void mainMenu();
+void gameLoop();
 void isCollision ();					// Checks for collisions
 void isCatch ();						// Checks for fish collisions aka catch
 void loadGraphics();					// Puts graphics into buffer
@@ -207,12 +239,46 @@ void start()
 int main() {
 	
 	start();			// calls start function to init display, timers, & IO
+	while(1) {
+		mainMenu();
+	}
+	
+	return 0;
+	
+}
+
+void mainMenu () {
+	
+	while(1) {
+		
+		inputHandler();			// poll inputs
+		menuPageActive = 1;		// set flag to get correct screen
+		displayMenuPage();		// display Menu Screen
+		
+		// Start Game
+		if(inputs & BTN_1) {
+			delayms(16);
+			menuPageActive = 0;	// remove flag
+			gameLoop();			// start game
+		}
+		
+	}
+	return;
+}
+
+void gameLoop () {
+	
+	gameFinished = 0;
 	
 	/* initialise some values for start of the game */
 	spritex = 10;
 	spritey = 16;
 	currentLevel = 1;
-	gameOver = 0;		// set flags to 0
+	lives = 5;
+	lifeCounter = 4;
+	livesDisplay = 0x1F;
+	score = 0;
+	gameOver = 0;		// set flags
 	gameWon = 0;
 	levelPos = 0;
 	/* Update LEDs to show lives
@@ -223,6 +289,10 @@ int main() {
 	setFish();		// set fish for the level
 	
 	while(1) {
+		
+		if(gameFinished == 1) {
+			return;
+		}
 		
 		inputHandler();
 	
@@ -240,10 +310,9 @@ int main() {
 		loadGraphics();
 	}
 	
-	return 0;
+	return;
 	
 }
-
 
 
 void inputHandler() {
@@ -308,8 +377,10 @@ void updateLogic() {
 	if(lives == 0) {
 		// end game logic
 		gameOver = 1;			// set gameover flag to 1
-		displayMenuPage();		// display Next Level screen
+		displayMenuPage();		// display game over screen
 		delayms(700);			// delay so it stays up for a short while
+		gameOver = 0;			// clear flag
+		gameFinished = 1;		// exit game loop
 	}
 	
 	// DETECT HITING END OF LEVEL FLAG
@@ -332,6 +403,8 @@ void updateLogic() {
 		gameWon = 1;			// set gameWon to 1
 		displayMenuPage();		// display Next Level screen
 		delayms(700);			// delay so it stays up for a short while
+		gameWon = 0;			// clear flag
+		gameFinished = 1;		// exit game loop
 	}
 }
 
@@ -392,7 +465,11 @@ void displayMenuPage() {
 
 	// Function to put correct screen into display buffer
 	// x, y, size, graphics data, displayBuffer
-	if(gameWon == 1) {
+	if(menuPageActive == 1) {
+		loadScreen (36, 1, 58, titlePage, displayBuffer);
+		loadScreen (42, 2, 44, pressTo, displayBuffer);
+	}
+	else if(gameWon == 1) {
 		loadScreen (49, 1, 30, gameWonDis, displayBuffer);
 	}
 	else if(gameOver == 1) {
