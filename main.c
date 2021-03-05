@@ -111,6 +111,7 @@ int livesDisplay = 0x1F;			// lives display value
 int lives = 5;						// lives counter for logic
 int score = 0;						// score counter
 int playTimeCounter = 0;			// time counter
+int finalscore = 0;					// final score holder
 
 //Interval between updates of the game logic. 160 -> 60Hz, 190 -> 52Hz
 #define UPDATE_INTERVAL 190 		//clock measures s *10^-4, not -3 so 160 -> 16ms
