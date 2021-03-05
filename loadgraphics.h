@@ -15,7 +15,7 @@ void loadNet (int x, int y, int direction, int data[127][2], uint8_t * levelBuff
 
 //void loadFish (int x, int y, int direction, int data[14][2], uint8_t * levelBuffer);
 
-void loadFish (int levelFish[3][3], int data[14][2], uint8_t * levelBuffer);
+void loadFish (int levelFish[3][4], int data[14][2], uint8_t * levelBuffer);
 
 void loadLevel (int levelPos, uint8_t *levelBuffer, uint8_t *displayBuffer);
 

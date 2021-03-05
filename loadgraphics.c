@@ -118,29 +118,8 @@ void loadNet (int x, int y, int direction, int data[127][2], uint8_t * levelBuff
 	}
 }
 
-/*
-void loadFish (int x, int y, int direction, int levelFish[3][3], int data[14][2], uint8_t * levelBuffer) {
-	
-	int size = 14;
-	
-	int valueX;
-	int valueY;
-	int B, b;
-	int i;
-	
-	for(i = 0; i < size; i++) {
 
-		valueX = (data[i][0] * direction) + x;
-		valueY = data[i][1] + y;
-
-		B = (valueY / 8) * 256 + valueX;
-		b = valueY % 8;
-
-		setBit(&levelBuffer[B], b);
-	}
-} */
-
-void loadFish (int levelFish[3][3], int data[14][2], uint8_t * levelBuffer) {
+void loadFish (int levelFish[3][4], int data[14][2], uint8_t * levelBuffer) {
 	
 	int size = 14;
 	

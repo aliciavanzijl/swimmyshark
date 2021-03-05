@@ -94,7 +94,7 @@ int spritefront;					// the front end of the sprite
 int currentLevel;				// stores the current level
 int levelPos;						// where in the larger levelBuffer the screen showing
 int levelObstacles[5][2];			// stores 5 obstacles and x/y coordinates for each
-int levelFish[3][3];				// stores 6 obstacles [0]x [1]y [2]active
+int levelFish[3][4];				// stores 6 obstacles [0]x [1]y [2]active [3]y direction
 int lifeCounter = 4;				// counter to change led display for lives
 int livesDisplay = 0x1F;			// lives display value
 int lives = 5;						// lives counter for logic
@@ -124,6 +124,7 @@ void loadLevel1();
 void loadLevel2();
 void loadLevel3();
 void setFish();
+void moveFish();
 int powerOf (int exp, int base);		// simple function for calculating power
 
 
@@ -135,6 +136,12 @@ void user_isr()
     	IFS(0) &= ~0x10000;
 		tickClk();
   	}
+	
+	if (getClk() == 500) {
+		moveFish();
+		clearClk();
+	}
+	
 	
 }
 
@@ -289,9 +296,9 @@ void isCatch() {
 	int fishNumber;
 	for(fishNumber = 0; fishNumber < 3; fishNumber++) {
 		
-		if ( ((spritey + 4) >= levelFish[fishNumber][1] & (spritey + 4) <= (levelFish[fishNumber][1] + 8) ) & (spritefront == (levelFish[fishNumber][0] - levelPos) | spritefront == ((levelFish[fishNumber][0] - levelPos)+8*spritedirection)) ) {
+		if ( (levelFish[fishNumber][2] == 1) & ((spritey + 4) >= levelFish[fishNumber][1] & (spritey + 4) <= (levelFish[fishNumber][1] + 8) ) & (spritefront == (levelFish[fishNumber][0] - levelPos) | spritefront == ((levelFish[fishNumber][0] - levelPos)+8*spritedirection)) ) {
 			// CATCH DETECTED
-			delayms(128);
+			delayms(64);
 			levelFish[fishNumber][2] = 0;	// set fish to inactive
 			score++;						// increase score total
 		}
@@ -428,17 +435,78 @@ void loadLevel3 () {
 }
 
 void setFish() {
-	levelFish[0][0] = 120;
-	levelFish[0][1] = 18;
-	levelFish[0][2] = 1;
 	
-	levelFish[1][0] = 140;
-	levelFish[1][1] = 18;
-	levelFish[1][2] = 1;
+	if (currentLevel == 1) {
+		levelFish[0][0] = 120;
+		levelFish[0][1] = 18;
+		levelFish[0][2] = 1;
+		levelFish[0][3] = 1;
 	
-	levelFish[2][0] = 200;
-	levelFish[2][1] = 10;
-	levelFish[2][2] = 1;
+		levelFish[1][0] = 164;
+		levelFish[1][1] = 20;
+		levelFish[1][2] = 1;
+		levelFish[1][3] = 1;
+	
+		levelFish[2][0] = 200;
+		levelFish[2][1] = 14;
+		levelFish[2][2] = 1;
+		levelFish[2][3] = 1;
+	} 
+	else if (currentLevel == 2) {
+		levelFish[0][0] = 120;
+		levelFish[0][1] = 18;
+		levelFish[0][2] = 1;
+		levelFish[0][3] = 1;
+	
+		levelFish[1][0] = 200;
+		levelFish[1][1] = 12;
+		levelFish[1][2] = 1;
+		levelFish[1][3] = 1;
+	
+		levelFish[2][0] = 250;
+		levelFish[2][1] = 10;
+		levelFish[2][2] = 1;
+		levelFish[2][3] = 1;
+	} 
+	else if (currentLevel == 3) {
+		levelFish[0][0] = 120;
+		levelFish[0][1] = 18;
+		levelFish[0][2] = 1;
+		levelFish[0][3] = 2;
+	
+		levelFish[1][0] = 180;
+		levelFish[1][1] = 14;
+		levelFish[1][2] = 1;
+		levelFish[1][3] = 1;
+	
+		levelFish[2][0] = 250;
+		levelFish[2][1] = 18;
+		levelFish[2][2] = 1;
+		levelFish[2][3] = 2;
+	}
+}
+
+void moveFish() {
+	
+	int fishNumber;
+	for(fishNumber = 0; fishNumber < 3; fishNumber++) {
+		// move in x
+		if(levelFish[fishNumber][0] > -2) {
+			levelFish[fishNumber][0]--;	// move all fish in the x-axis by -1
+		} else if (levelFish[fishNumber][0] == -2) {
+			levelFish[fishNumber][2] = 0;
+		}
+		
+		// move in y
+		if(levelFish[fishNumber][1] == 8) {
+			levelFish[fishNumber][3] *= -1;
+		}
+		if(levelFish[fishNumber][1] == 20) {
+			levelFish[fishNumber][3] *= -1;
+		}
+		levelFish[fishNumber][1] += levelFish[fishNumber][3];	// move fish in y-axis
+	}
+	
 }
 
 // Little Helper Math Functions
