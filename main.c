@@ -460,16 +460,16 @@ void showHighScores() {
 		int i;
 	
 		// highest
-		loadCharacter (44, 1, highScores[0][1], font, displayBuffer);
-		loadCharacter (54, 1, highScores[0][2], font, displayBuffer);
-		loadCharacter (64, 1, highScores[0][3], font, displayBuffer);
+		loadCharacter (44, 1, highScores[2][1], font, displayBuffer);
+		loadCharacter (54, 1, highScores[2][2], font, displayBuffer);
+		loadCharacter (64, 1, highScores[2][3], font, displayBuffer);
 	
 		offset = 128*1 + 64 + 10;
 	
 		// Insert Score Number
-		if (highScores[0][0] >= 0) {
+		if (highScores[2][0] >= 0) {
 		
-			int holder = highScores[0][0];
+			int holder = highScores[2][0];
 			int ones = 0;
 			int tens = 0;
 			int hundreds = 0;
@@ -584,16 +584,16 @@ void showHighScores() {
 		}
 	
 		// lowest
-		loadCharacter (44, 3, highScores[2][1], font, displayBuffer);
-		loadCharacter (54, 3, highScores[2][2], font, displayBuffer);
-		loadCharacter (64, 3, highScores[2][3], font, displayBuffer);
+		loadCharacter (44, 3, highScores[0][1], font, displayBuffer);
+		loadCharacter (54, 3, highScores[0][2], font, displayBuffer);
+		loadCharacter (64, 3, highScores[0][3], font, displayBuffer);
 	
 		offset = 128*3 + 64 + 10;
 	
 		// Insert Score Number
-		if (highScores[2][0] >= 0) {
+		if (highScores[0][0] >= 0) {
 		
-			int holder = highScores[2][0];
+			int holder = highScores[0][0];
 			int ones = 0;
 			int tens = 0;
 			int hundreds = 0;
@@ -817,10 +817,48 @@ void getInitials () {
 	
 }
 
-/* SORTS HIGH SCORE ARRAY INTO DESCENDING ORDER */
+/* SORTS HIGH SCORE ARRAY INTO ORDER 
+** LOWEST = 0
+*/
 void sortHighScores() {
 	
+	// holder
+	int holder[1][4];
+	int i;
+	int j;
+	int min;
 	
+	// find minimum in current high score array
+	for (i = 0; i < 3; i++) {
+		
+		min = i;
+		
+		for (j = i+1; j < 3; j++) {
+			if(highScores[j][0] < highScores[min][0]){
+				min = j;
+			}
+		}
+		
+		// SWAP INTO PLACE
+		// min into temp
+		holder[0][0] = highScores[min][0];
+		holder[0][1] = highScores[min][1];
+		holder[0][2] = highScores[min][2];
+		holder[0][3] = highScores[min][3];
+		
+		// put i position into min space
+		highScores[min][0] = highScores[i][0];
+		highScores[min][1] = highScores[i][1];
+		highScores[min][2] = highScores[i][2];
+		highScores[min][3] = highScores[i][3];
+		
+		// put min values into i position
+		highScores[i][0] = holder[0][0];
+		highScores[i][1] = holder[0][1];
+		highScores[i][2] = holder[0][2];
+		highScores[i][3] = holder[0][3];
+		
+	}
 	
 }
 
