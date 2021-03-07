@@ -985,10 +985,9 @@ void highScoreChecker(int score) {
 	
 	// find minimum in current high score and replace
 	int min = 0;
-	for (i = 0; i < 3; i++) {
-		min = i;
-		if(highScores[i+1][0] < highScores[i][0]){
-			min = i+1;
+	for (i = 1; i < 3; i++) {
+		if(highScores[i][0] < highScores[min][0]){
+			min = i;
 		}
 	}
 	
