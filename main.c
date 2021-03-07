@@ -111,24 +111,26 @@ void start()
 	initIO();
 }
 
+/* MAIN FUNCTION */
 int main() {
 	
 	start();			// calls start function to init display, timers, & IO
 	while(1) {
-		titleScreen();
+		titleScreen();	// displays the title screen
 	}
 	
 	return 0;
 	
 }
 
+/* DISPLAYS TITLE & CREDITS */
 void titleScreen () {
 	
 	while(1) {
 		
-		inputHandler();			// poll inputs
+		inputHandler();				// poll inputs
 		
-		displayTitlePage();
+		displayTitlePage();			// Puts tile graphics on the display
 		
 		if(inputs & BTN_1) {
 			delayms(16);
@@ -138,13 +140,14 @@ void titleScreen () {
 	return;
 }
 
+/* DISPLAYS MAIN MENU */
 void mainMenu() {
 	
 	while(1) {
 		
 		inputHandler();			// poll inputs
 
-		displayMenuPage();		// display Menu Screen
+		displayMenuPage();		// puts menu text on display
 		
 		// Start Game
 		if(inputs & BTN_2) {
@@ -160,25 +163,29 @@ void mainMenu() {
 	return;
 }
 
+/* MAIN GAME LOOP */
 void gameLoop () {
 	
-	gameFinished = 0;
+	gameFinished = 0;		// flag to check if game finished
 	
 	/* initialise some values for start of the game */
-	spritex = 10;
-	spritey = 16;
-	currentLevel = 1;
-	lives = 5;
-	lifeCounter = 4;
-	livesDisplay = 0x1F;
-	score = 0;
-	levelPos = 0;
+	spritex = 10;			// starting x position
+	spritey = 20;			// starting y position
+	currentLevel = 1;		
+	
+	score = 0;				// starting score 0
+	levelPos = 0;			// position in the level (to scroll screen)
+	
+	lives = 5;				// starting lives 5
+	lifeCounter = 4;		// life counter (for descreasing lives)
+	livesDisplay = 0x1F;	// set LEDs to show 5 lights
+	
 	/* Update LEDs to show lives
 	** Port E 7-0 are the LEDs PORTE has address 0xbf886110 */
 	volatile int* porte = (volatile int*) 0xbf886110;
 	*porte = 0x001f & livesDisplay;
 	
-	setFish();		// set fish for the level
+	setFish();				// set fish for the level
 	
 	while(1) {
 		
@@ -186,15 +193,15 @@ void gameLoop () {
 			return;
 		}
 		
-		inputHandler();
+		inputHandler();						// polls inputs
 	
-		updateLogic();
+		updateLogic();						// game logic - interactive stuff here
 		
 		if (gameFinished == 1) {
 			break;
 		}
 		
-		if(currentLevel == 1) {
+		if(currentLevel == 1) {				// checks current level and load obstacles
 			loadLevel1(levelBuffer);
 		} else if (currentLevel == 2) {
 			loadLevel2(levelBuffer);
@@ -202,64 +209,69 @@ void gameLoop () {
 			loadLevel3(levelBuffer);
 		}
 		
-		delayms(16);		// slow it down a bit so graphics doesn't jump
-		loadGraphics();
+		delayms(16);						// slow it down a bit so doesn't flicker
+		loadGraphics();						// loads all graphics to the buffer
 	}
 	
 	return;
 	
 }
 
-
+/* VERY IMPORTANT INPUT HANDLER - GETS IO DATA */
 void inputHandler() {
 	
-	inputs = getInputs();            //get inputs from board
+	inputs = getInputs();            		//get inputs from board - sws & btns
 	
 }
 
+/* UPDATES GAME LOGIC PER INPUTS ETC */
 void updateLogic() {
 	
-	// insert functions to update the logic with buttons
-	if(inputs & BTN_1) {
-		if(spritedirection == 1) {
+	/* MOVES SHARK PER BUTTONS */
+	if(inputs & BTN_1) {					// move in x direction - right
+		if(spritedirection == 1) {			// if already facing right, move
 			if(spritex < 120) {
 				spritex++;
 			}
 		} else {
-			spritedirection = 1;
+			spritedirection = 1;			// if not facing right, flip
 		}
 	}
-	if(inputs & BTN_4) {
-		if(spritedirection == -1) {
+	
+	if(inputs & BTN_4) {					// move in x direction - left
+		if(spritedirection == -1) {			// if already facing left, move
 			if(spritex > 8) {
 				spritex--;
 			}
 		} else {
-			spritedirection = -1;
+			spritedirection = -1;			// if not facing left, flip
 		}
 	}
-	if(inputs & BTN_3) {
-		if(spritey < 23) {
+	
+	if(inputs & BTN_3) {					// move in y direction down
+		if(spritey < 23) {					// limited by max down of display - UI
 			delayms(16);
 			spritey++;
 		}
 	}
-	if(inputs & BTN_2) {
-		if(spritey > 8) {
+	if(inputs & BTN_2) {					// move in y direction up
+		if(spritey > 8) {					// limited by max up of display - waves
 			delayms(16);
 			spritey--;
 		}
 	}
 	
-	// Update sprite front for collision detection
-	spritefront = spritex + (6 * spritedirection);
+	/* Update sprite front for collision detection
+	** x is at back of sprite so add 7 x direction to get the front of the sprite */
+	spritefront = spritex + (7 * spritedirection);		
 	
-	// Display Scroll
+	// Level Scroll
+	// Once sprite front hits 100 and the player is still trying to move right
 	if(spritefront >= 100 & (inputs & BTN_1)) {
 		delayms(16);
 		if(levelPos < 128) {
-			levelPos++;
-			spritex--;
+			levelPos++;				// scroll the level right
+			spritex--;				// keep the sprite in place
 		}
 	}
 	
@@ -269,13 +281,15 @@ void updateLogic() {
 	// FISH CATCH DETECTION
 	isCatch();
 	
-	// DETECT HITING END OF LEVEL FLAG
+	/* DETECT HITING END OF LEVEL FLAG
+	** levelPos 128 means end of scroll, 
+	** spritefront reaching anywhere in the y of the flag is a valid win */
 	if(levelPos == 128 & spritefront >= 118) {
 		
-		if (currentLevel != 3) {
+		if (currentLevel != 3) {		// if game not over, show Next Level on display
 			
 			displayNextLevelPage();
-			delayms(700);			// delay so it stays up for a short while
+			delayms(800);				// delay so it stays up for a short while
 			
 		}
 		
@@ -289,23 +303,24 @@ void updateLogic() {
 	// DETECT GAME COMPLETED
 	if(currentLevel > 3) {
 
-		displayGameWin();
+		displayGameWin();		// show You Win! on the screen
 		delayms(700);			// delay so it stays up for a short while
-		highScoreChecker(score);
-		gameFinished = 1;		// exit game loop
+		highScoreChecker(score);// check for high score
+		gameFinished = 1;		// exit game loop by setting flag
 	}
 	
 	// DETECT GAME OVER
 	if(lives == 0) {
 
 		displayGameOver();
-		gameFinished = 1;		// exit game loop
+		gameFinished = 1;		// exit game loop by setting flag
 		delayms(700);			// delay so it stays up for a short while
 	}
 	
 }
 
-// COLLISION DETECTION FUNCTION
+/* COLLISION DETECTION FUNCTION
+** Goes through all 5 level obstacles, checks if shark overlaps obstacle position data stored in array*/
 void isCollision () {
 	int obj;
 	for(obj = 0; obj < 5; obj++) {
@@ -313,13 +328,20 @@ void isCollision () {
 			
 			// COLLISION DETECTED
 			delayms(128);
-			livesDisplay = livesDisplay - powerOf(lifeCounter, 2);
-			spritex = spritex - 4*spritedirection;
+			/* decrease life display LEDs
+			** e.g. to get 0x1F to change to Ox0F, need to minus 16, which is 4^2
+			** Then minus 8 = 2^3, then 4 = 2^2, then 2 = 2^1, then 1 = 2^0
+			** so lifeCounter holds the decreasing exponents */
+			livesDisplay = livesDisplay - powerOf(lifeCounter, 2); 
+			
+			// push shark back a bit from obstacle
+			spritex = spritex - 6*spritedirection; 
 			
 			// Update LEDs to show lives
 			// Port E 7-0 are the LEDs PORTE has address 0xbf886110
 			volatile int* porte = (volatile int*) 0xbf886110;
 			*porte = 0x001f & livesDisplay;
+			
 			lifeCounter--;						// decrease lifeCounter
 			lives--;							// decrease life total
 			
@@ -327,6 +349,10 @@ void isCollision () {
 	}
 }
 
+/* FISH CATCH DETECTION FUNCTION
+** Goes through the 3 fish per level, checks if fish is active and shark overlaps
+** Sets fish to inactive so that it is removed from the display
+** increases score */
 void isCatch() {
 	
 	int fishNumber;
@@ -348,15 +374,18 @@ void loadGraphics() {
 	clearBuffer(512, displayBuffer); 	//Clears the display buffer
 
 	// Function to put player and scene graphics in buffer
-	loadSprite(spritex, spritey, spritedirection, shark, displayBuffer);
-	loadTiles(0, 2, 16, 128, lowerLine, displayBuffer); //load wave tiles
-	loadFish (levelFish, fish, levelBuffer);
-	loadLevel(levelPos, levelBuffer, displayBuffer);
-	loadUI(4, 3, score, lives, scoreLabel, livesLabel, displayBuffer);
+	loadSprite(spritex, spritey, spritedirection, shark, displayBuffer);	// shark
+	loadTiles(0, 2, 16, 128, lowerLine, displayBuffer); 					// waves
+	loadFish (levelFish, fish, levelBuffer);								// fish
+	loadLevel(levelPos, levelBuffer, displayBuffer);						// level obstacles flag etc
+	loadUI(4, 3, score, lives, scoreLabel, livesLabel, displayBuffer);		// UI
+	
 	displayUpdate(displayBuffer); //displays new buffer
 }
 
-// Updates the display with graphics from displayBuffer - screens/pages only
+/* THE FOLLOWING UPDATE DISPLAY WITH SCREENS - NOT GAME PLAY */
+
+// Main Menu Display
 void displayMenuPage() {
 	
 	clearBuffer(512, displayBuffer); 	// Clears the display buffer
@@ -370,6 +399,7 @@ void displayMenuPage() {
 
 }
 
+// Title Page
 void displayTitlePage() {
 	
 	clearBuffer(512, displayBuffer); 	//Clears the display buffer
@@ -382,6 +412,7 @@ void displayTitlePage() {
 	
 }
 
+// Next Level
 void displayNextLevelPage() {
 	
 	clearBuffer(512, displayBuffer); 	//Clears the display buffer
@@ -392,6 +423,7 @@ void displayNextLevelPage() {
 	
 }
 
+// Game Over
 void displayGameOver() {
 	
 	clearBuffer(512, displayBuffer); 	//Clears the display buffer
@@ -402,6 +434,7 @@ void displayGameOver() {
 	
 }
 
+// Game Win
 void displayGameWin() {
 	
 	clearBuffer(512, displayBuffer); 	//Clears the display buffer
@@ -410,6 +443,11 @@ void displayGameWin() {
 	
 }
 
+/* END OF SCREEN DISPLAY FUNCTIONS */
+
+/* HIGH SCORE FUNCTIONS */
+
+// DISPLAYS HIGH SCORES
 void showHighScores() {
 	
 	while (1) {
@@ -619,9 +657,12 @@ void showHighScores() {
 	
 }
 
-
+/* CHECKS FOR NEW HIGH SCORE 
+** AND SETS NEW DATA IN ARRAY FOR DISPLAY */
 void highScoreChecker(int score) {
 	
+	// calculate final score - multiplied by 10 because looks cooler!
+	// and can also add in speed bonus/deduction later
 	finalScore = (score * 10);
 	
 	int i;
@@ -635,10 +676,10 @@ void highScoreChecker(int score) {
 	}
 	
 	if(isHigh == 1) {
-		getInitials();
+		getInitials();		// gets the iniials input from player
 	}
 	
-	// find minimum in current high score and replace
+	// find minimum in current high score array
 	int min = 0;
 	for (i = 1; i < 3; i++) {
 		if(highScores[i][0] < highScores[min][0]){
@@ -646,20 +687,21 @@ void highScoreChecker(int score) {
 		}
 	}
 	
-	// Replace
+	// Replace minimum with new score and initials
 	highScores[min][0] = finalScore;
 	highScores[min][1] = newInitial[0];
 	highScores[min][2] = newInitial[1];
 	highScores[min][3] = newInitial[2];
 	
-	// Sort highScores
+	// Sort highScores into descending order
 	sortHighScores();
 	
-	gameFinished = 1;		// exit game loop
-	mainMenu();
+	gameFinished = 1;		// exit game loop (added in case of bug)
+	mainMenu();				// returns player to main menu
 	
 }
 
+/* GETS INITIALS INPUT FROM PLAYER */
 void getInitials () {
 	
 	// Function to get intitials
@@ -668,7 +710,7 @@ void getInitials () {
 	display_string(1, "New High Score!");
 	display_string(2, "Enter Initials!");
 	display_update(textBuffer);
-	delayms(800);
+	delayms(900);
 	
 	//Initialise display	
 	int initialOne = 65;
@@ -678,21 +720,25 @@ void getInitials () {
 	
 	clearBuffer(512, displayBuffer); 	// Clears the display buffer
 	
+	// PUT INSTRUCTIONS ON SCREEN
 	loadScreen (20, 0, 48, btn4select, displayBuffer);
 	loadScreen (20, 1, 38, btn3next, displayBuffer);
 	loadScreen (20, 2, 41, btn1save, displayBuffer);
 	
+	// SHOW CHARACTER SELECTION ON SCREEN
 	loadCharacter (44, 3, initialOne, font, displayBuffer);
 	loadCharacter (54, 3, initialTwo, font, displayBuffer);
 	loadCharacter (64, 3, initialThree, font, displayBuffer);
 	
 	displayUpdate(displayBuffer); //displays new buffer
 	
+	// GET INPUT
 	while(1) {
 				
 		inputHandler();			// poll inputs
 		
-		// Logic	
+		// LOGIC TIME
+		
 		// Change Initials
 		if(inputs & BTN_4) {
 			// Change Initial One
@@ -726,6 +772,7 @@ void getInitials () {
 				}
 			}
 		}
+		
 		// Switch Initial
 		if(inputs & BTN_3) {
 			if(currentInitial < 3) {
@@ -752,10 +799,12 @@ void getInitials () {
 		
 		clearBuffer(512, displayBuffer); 	// Clears the display buffer
 		
+		// CONTINUE TO SHOW INSTRUCTIONS
 		loadScreen (20, 0, 48, btn4select, displayBuffer);
 		loadScreen (20, 1, 38, btn3next, displayBuffer);
 		loadScreen (20, 2, 41, btn1save, displayBuffer);
 		
+		// SHOW CURRENT CHARACTER SELECTIONS
 		loadCharacter (44, 3, initialOne, font, displayBuffer);
 		loadCharacter (54, 3, initialTwo, font, displayBuffer);
 		loadCharacter (64, 3, initialThree, font, displayBuffer);
@@ -768,14 +817,16 @@ void getInitials () {
 	
 }
 
+/* SORTS HIGH SCORE ARRAY INTO DESCENDING ORDER */
 void sortHighScores() {
 	
 	
 	
 }
 
-// Function from Labs
+/* FUNCTIONS COPIED FROM LAB FILES FOR STRING DISPLAY */
 
+// PUTS STRINGS INTO TEXT BUFFER
 void display_string(int line, char *s) {
 	int i;
 	if(line < 0 || line >= 4)
@@ -790,6 +841,7 @@ void display_string(int line, char *s) {
 		} else
 			textBuffer[line][i] = ' ';
 }
+
 
 /* LEVELS & FISH CODE */
 
@@ -887,6 +939,12 @@ void loadLevel3 () {
 
 void setFish() {
 	
+	/* FISH DATA:
+	** [0] starting x position
+	** [1] starting y position
+	** [2] active status - 1 is active
+	** [3] y axis movement speed
+	*/
 	if (currentLevel == 1) {
 		levelFish[0][0] = 120;
 		levelFish[0][1] = 18;
@@ -937,10 +995,12 @@ void setFish() {
 	}
 }
 
+/* FISH MOVEMENT DATA - UPDATED ON TIMER */
 void moveFish() {
 	
 	int fishNumber;
 	for(fishNumber = 0; fishNumber < 3; fishNumber++) {
+		
 		// move in x
 		if(levelFish[fishNumber][0] > -2) {
 			levelFish[fishNumber][0]--;	// move all fish in the x-axis by -1
@@ -960,7 +1020,8 @@ void moveFish() {
 	
 }
 
-// Little Helper Math Functions
+// Little Helper Math Function
+// Used for updating LED lights to show lives
 int powerOf (int exp, int base) {
 	
 	int result = 1;
