@@ -169,6 +169,9 @@ uint8_t numbers[]  = {
 
 /* Functions */
 
+/* LOADS SHARK INTO THE DISPLAY BUFFER 
+** USES ADVANCED POSITIONING AND LOADS PIXEL BY PIXEL
+*/
 void loadSprite (int x, int y, int direction, int data[23][2], uint8_t * displayBuffer) {
 	
 	int size = 23;
@@ -180,16 +183,26 @@ void loadSprite (int x, int y, int direction, int data[23][2], uint8_t * display
 	
 	for(i = 0; i < size; i++) {
 		
-		valueX = (data[i][0] * direction) + x;
+		// takes x coordinate of pixel & offset of direction + starting x
+		valueX = (data[i][0] * direction) + x; 
+		
+		// takes y coordinate of pixel & offset of starting y.
 		valueY = data[i][1] + y;
 		
+		// B is set to the correct row and x value in dislay buffer
 		B = (valueY / 8) * 128 + valueX;
+		// b gives the offset within the byte to put the pixel in the correct place
 		b = valueY % 8;
 		
+		// set the pixel as 1
 		setBit(&displayBuffer[B], b);
+		
 	}
 }
 
+/* LOADS WAVE TILES INTO THE ANY BUFFER 
+** USES SIMPLE POSITIONING (Y=0-3)
+*/
 void loadTiles (int x, int y, int tiles, int bufferSize, const uint8_t *data, uint8_t * buffer) {
 	
 	int size = 8;
@@ -205,6 +218,10 @@ void loadTiles (int x, int y, int tiles, int bufferSize, const uint8_t *data, ui
 	}
 }
 
+/* LOADS OBJECTS INTO THE LEVEL BUFFER 
+** USES SIMPLE POSITIONING (Y=0-3)
+** DIRECTION CAN BE MODIFIED
+*/
 void loadObject (int x, int y, int size, int direction, const uint8_t *data, uint8_t *buffer) {
 	
 	int i;
@@ -216,6 +233,9 @@ void loadObject (int x, int y, int size, int direction, const uint8_t *data, uin
 	
 }
 
+/* LOADS CHARACTERS FROM FONT INTO THE DISPLAY BUFFER 
+** USES SIMPLE POSITIONING (Y=0-3)
+*/
 void loadCharacter (int x, int line, int charNumber, const uint8_t *font, uint8_t *buffer) {
 	
 	int i;
@@ -227,7 +247,9 @@ void loadCharacter (int x, int line, int charNumber, const uint8_t *font, uint8_
 	
 }
 
-
+/* LOADS LABELS (IMAGES) AND NUMBERS INTO THE DISPLAY BUFFER 
+** USES SIMPLE POSITIONING (Y=0-3)
+*/
 void loadUI (int x, int y, int score, int lives, const uint8_t *scoreLabel, const uint8_t *livesLabel, uint8_t *displayBuffer) {
 	
 	// Add Score Label
@@ -309,6 +331,9 @@ void loadUI (int x, int y, int score, int lives, const uint8_t *scoreLabel, cons
 	
 }
 
+/* LOADS ROCK INTO THE LEVEL BUFFER 
+** USES ADVANCED POSITIONING AND LOADS PIXEL BY PIXEL
+*/
 void loadRock (int x, int y, int direction, int data[23][2], uint8_t * levelBuffer) {
 	
 	int size = 23;
@@ -330,7 +355,9 @@ void loadRock (int x, int y, int direction, int data[23][2], uint8_t * levelBuff
 	}
 }
 
-
+/* LOADS HOOK INTO THE LEVEL BUFFER 
+** USES ADVANCED POSITIONING AND LOADS PIXEL BY PIXEL
+*/
 void loadHook (int x, int y, int direction, int data[11][2], uint8_t * levelBuffer) {
 	
 	int size = 11;
@@ -352,6 +379,9 @@ void loadHook (int x, int y, int direction, int data[11][2], uint8_t * levelBuff
 	}
 }
 
+/* LOADS NET INTO THE LEVEL BUFFER 
+** USES ADVANCED POSITIONING AND LOADS PIXEL BY PIXEL
+*/
 void loadNet (int x, int y, int direction, int data[127][2], uint8_t * levelBuffer) {
 	
 	int size = 127;
@@ -373,7 +403,9 @@ void loadNet (int x, int y, int direction, int data[127][2], uint8_t * levelBuff
 	}
 }
 
-
+/* LOADS FISH INTO THE LEVEL BUFFER 
+** USES ADVANCED POSITIONING AND LOADS PIXEL BY PIXEL
+*/
 void loadFish (int levelFish[3][4], int data[14][2], uint8_t * levelBuffer) {
 	
 	int size = 14;
@@ -387,12 +419,12 @@ void loadFish (int levelFish[3][4], int data[14][2], uint8_t * levelBuffer) {
 	
 	for(fishNumber = 0; fishNumber < 3; fishNumber++) {
 		
-		if (levelFish[fishNumber][2] == 1) {
+		if (levelFish[fishNumber][2] == 1) {	// IF FISH ACTIVE, SHOW
 			
 			for(i = 0; i < size; i++) {
 		
-				valueX = (data[i][0]) + levelFish[fishNumber][0];
-				valueY = data[i][1] + levelFish[fishNumber][1];
+				valueX = (data[i][0]) + levelFish[fishNumber][0]; 	// [0] x position
+				valueY = data[i][1] + levelFish[fishNumber][1];		// [1] y position
 		
 				B = (valueY / 8) * 256 + valueX;
 				b = valueY % 8;
@@ -403,20 +435,28 @@ void loadFish (int levelFish[3][4], int data[14][2], uint8_t * levelBuffer) {
 	}
 }
 
-
+/* LOADS LEVEL BUFFER (FROM POSITION -> 128 pixels) INTO THE DISPLAY BUFFER 
+** USES SIMPLE POSITIONING (Y=0-3)
+** USES LEVELPOS AS AN OFFSET ON THE LEVEL BUFFER
+*/
 void loadLevel (int levelPos, uint8_t *levelBuffer, uint8_t *displayBuffer) {
 	
 	int yPos;
 	int xPos;
 	
 	for (yPos = 0; yPos < 3; yPos++) {
+		
 		for (xPos = 0; xPos < 128; xPos++) {
+			
 			displayBuffer[yPos*128+xPos] |= levelBuffer[yPos*256+xPos+levelPos];
 		}
 	}
 	
 }
 
+/* LOADS AN IMAGES (FOR SCREENS/MENUS) INTO THE DISPLAY BUFFER 
+** USES SIMPLE POSITIONING (Y=0-3)
+*/
 void loadScreen (int x, int y, int size, const uint8_t *data, uint8_t *buffer) {
 	
 	int i;
@@ -463,7 +503,9 @@ void display_update(char textBuffer[4][16]) {
 	}
 }
 
-//Sets a bit to the display buffer
+/* SETS A BIT TO THE DISPLAY BUFFER
+** b is the offset on the coordinate
+*/
 void setBit(uint8_t* byte, uint8_t b)
 {
 	*byte |= ((uint8_t) 1 << b);
