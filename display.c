@@ -177,3 +177,13 @@ void clearBuffer(int size, uint8_t * byteBuffer)
 	int i;
 	for (i = 0; i < size; i++) byteBuffer[i] = 0;
 }
+
+//Clears buffer area
+void clearBufferRow(int row, uint8_t * byteBuffer)
+{
+	int i;
+	int pos = 128*row;
+	
+	for (i = 0; i < 128; i++) 
+		byteBuffer[pos + i] = 0;
+}

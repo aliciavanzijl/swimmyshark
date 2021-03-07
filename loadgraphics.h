@@ -8,6 +8,7 @@ void loadSprite (int x, int y, int direction, int data[23][2], uint8_t * display
 void loadTiles (int x, int y, int tiles, int bufferSize, const uint8_t *data, uint8_t * buffer);
 
 void loadObject (int x, int y, int size, int direction, const uint8_t *data, uint8_t * buffer);
+void loadCharacter (int x, int line, int charNumber, const uint8_t *font, uint8_t *buffer);
 
 void loadUI (int x, int y, int score, int lives, const uint8_t *scoreLabel, const uint8_t *livesLabel, uint8_t *displayBuffer);
 
@@ -20,6 +21,8 @@ void loadFish (int levelFish[3][4], int data[14][2], uint8_t * levelBuffer);
 void loadLevel (int levelPos, uint8_t *levelBuffer, uint8_t *displayBuffer);
 
 void loadScreen (int x, int y, int size, const uint8_t *data, uint8_t *buffer);
+
+void display_update();
 
 void setBit(uint8_t* byte, uint8_t b);
 
