@@ -675,24 +675,31 @@ void highScoreChecker(int score) {
 		}
 	}
 	
+	if(isHigh == 0) {
+		mainMenu();				// returns player to main menu
+	}
+	
+	// if a new high score
 	if(isHigh == 1) {
+		
 		getInitials();		// gets the iniials input from player
-	}
-	
-	// find minimum in current high score array
-	int min = 0;
-	for (i = 1; i < 3; i++) {
-		if(highScores[i][0] < highScores[min][0]){
-			min = i;
+		
+		// find minimum in current high score array
+		int min = 0;
+		for (i = 1; i < 3; i++) {
+			if(highScores[i][0] < highScores[min][0]){
+				min = i;
+			}
 		}
+		
+		// Replace minimum with new score and initials
+		highScores[min][0] = finalScore;
+		highScores[min][1] = newInitial[0];
+		highScores[min][2] = newInitial[1];
+		highScores[min][3] = newInitial[2];
+		
 	}
-	
-	// Replace minimum with new score and initials
-	highScores[min][0] = finalScore;
-	highScores[min][1] = newInitial[0];
-	highScores[min][2] = newInitial[1];
-	highScores[min][3] = newInitial[2];
-	
+
 	// Sort highScores into descending order
 	sortHighScores();
 	
