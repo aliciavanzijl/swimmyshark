@@ -294,7 +294,7 @@ void updateLogic() {
 		}
 		
 		spritex = 10;			// reinitialise shark position
-		spritey = 16;			// reinitialise shark position
+		spritey = 20;			// reinitialise shark position
 		currentLevel++;			// change to next level
 		levelPos = 0;			// reset screen scroll position
 		setFish();				// set fish for new level
