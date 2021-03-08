@@ -1,9 +1,14 @@
-This is an empty project template.
-Just add your own code to the existing C or assembly files.
-Any added C or assembly files will automatically be built,
-no need to edit the Makefile.
+This is a project created by Alicia van Zijl.
+A Platform Game for ChipKit uC32 and Basic I/O Shield: Swimmy Shark.
+March 2021
 
-The template contains the following source files:
+It is based on a project template provided by IS1200 teachers.
+Some functions were copied from lab files and documentation, these have been
+marked as such in the comments.
+
+Makefile provided by IS1200.
+
+The template provided by IS1200 contained the following source files:
 
 main.c:
 	Contains the entry point main()
