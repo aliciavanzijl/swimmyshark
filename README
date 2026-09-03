@@ -2,6 +2,8 @@ This is a project created by Alicia van Zijl.
 A Platform Game for ChipKit uC32 and Basic I/O Shield: Swimmy Shark.
 March 2021
 
+![A short demo of the game running](/shark_game_short.gif)  
+
 It is based on a project template provided by IS1200 teachers.
 Some functions were copied from lab files and documentation, these have been
 marked as such in the comments.
